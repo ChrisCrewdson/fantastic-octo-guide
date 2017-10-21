@@ -1,6 +1,7 @@
 'use strict';
 
 const async = require('async');
+const bottleneck = require("bottleneck");
 const hapi = require('hapi');
 const request = require('request-promise');
 
@@ -29,6 +30,23 @@ const itemIds = [
     42248076
 ];
 
+const getItem = function(itemId, term, callback) {
+    return request({uri: upstreamUri(itemId), json: true})
+    .then(function (json) {
+        console.log('got item id ' + itemId);
+        if (json.shortDescription.indexOf(term) > -1){
+            console.log('found match');
+            callback(null, itemId);
+        } else {
+            callback();
+        }
+    })
+    .catch(function (err) {
+        console.log('failure getting item id ' + itemId + ' ' + err);
+        callback(); // Don't shortcut getting a partial search result
+    });
+}
+
 // Create a server with a host and port
 const server = new hapi.Server();
 server.connection({
@@ -41,21 +59,10 @@ server.route({
     method: 'GET',
     path:'/search',
     handler: function (req, res) {
+        var limiter = new bottleneck(1, 1000);
+
         async.mapSeries(itemIds, function(itemId, callback) {
-            request({uri: upstreamUri(itemId), json: true})
-            .then(function (json) {
-                console.log('got item id ' + itemId);
-                if (json.shortDescription.indexOf(req.query.term) > -1){
-                    console.log('found match');
-                    callback(null, itemId);
-                } else {
-                    callback();
-                }
-            })
-            .catch(function (err) {
-                console.log('failure getting item id ' + itemId + ' ' + err);
-                callback(); // Don't shortcut getting a partial search result
-            });
+            limiter.schedule(getItem, itemId, req.query.term, callback);
         },
         function(err, mapRes) {
             if (err) {
