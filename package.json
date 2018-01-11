@@ -2,7 +2,7 @@
   "dependencies": {
     "async": "^2.5.0",
     "bottleneck": "^1.16.0",
-    "hapi": "^16.6.2",
+    "hapi": "^17.2.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2"
   },
