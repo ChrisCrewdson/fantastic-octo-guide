@@ -1,5 +1,7 @@
 # fantastic-octo-guide
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/ChrisCrewdson/fantastic-octo-guide.svg)](https://greenkeeper.io/)
+
 Take-Home Challenge
 
 This is your time to show-off your hacking / coding skills! Here is a quick coding exercise to do completely on your own. Use your favorite editor, feel free to Google anything you want and hack-away!
